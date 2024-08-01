@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Study Journal</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+        }
+        header {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .blockquote {
+            display: flex;
+            flex-direction: column;
+        }
+        .blockquote p {
+            align-self: end;
+        }
+        #calendar-body {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .month {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            margin: 10px;
+            padding: 10px;
+            width: 224px;
+        }
+        .month-name {
+            font-size: 18px;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+        .weekdays {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+        }
+        .weekday {
+            width: 32px;
+            text-align: center;
+            font-weight: bold;
+        }
+        .days {
+            display: flex;
+            flex-wrap: wrap;
+        }
+        .day {
+            width: 30px;
+            height: 30px;
+            border: 1px solid #ddd;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: default;
+        }
+        .day.highlight, .without-maven {
+            background-color: #ffeb3b;
+            cursor: pointer;
+        }
+        .day.highlight:hover {
+            background-color: #fdd835;
+        }
+        .day.highlightWithMaven, .with-maven {
+            background-color: seagreen;
+            cursor: pointer;
+        }
+        .day.highlightWithMaven:hover {
+            background-color: darkseagreen;
+        }
+        .day.highlightWeb1, .web1 {
+            background-color: darkseagreen;
+            cursor: pointer;
+        }
+        .day.highlightWeb1:hover {
+            background-color: seagreen;
+        }
+
+        footer {
+            margin-top: 2rem;
+            display: flex;
+            justify-content: center;
+        }
+
+        footer .color-block {
+            display: inline-block;
+            width: 18px;
+            height: 18px;
+
+        }
+
+        footer .text-block {
+            display: inline-block;
+            margin-right: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>那些天一起敲过的代码，记过的笔记</h1>
+        <div class="blockquote">
+            <h3>
+                "We can not solve our problems with the same level of thinking that created them."<br>
+            </h3>
+            <p><i>--- Albert Einstein</i></p>
+        </div>
+    </header>
+    <main id="calendar-body"></main>
+    <footer>
+        <div><span class="color-block web1">&nbsp;</span> <span class="text-block">预科阶段、</span></div>
+        <div><span class="color-block without-maven">&nbsp;</span> <span class="text-block">Maven 之前的阶段、</span></div>
+        <div><span class="color-block with-maven">&nbsp;</span> <span class="text-block">用了 Maven 之后的阶段</span></div>
+    </footer>
+    <script>
+        const highlightDatesWeb1 = [20240325, 20240326, 20240327, 20240328, 20240329];
+        const highlightDatesWithoutMaven = [20240401, 20240402, 20240403, 20240407, 20240408, 20240409, 20240410, 20240411, 20240412, 20240415, 20240416, 20240417, 20240418, 20240419, 20240422, 20240423, 20240424, 20240425, 20240426, 20240428, 20240429, 20240430, 20240506, 20240507, 20240508, 20240509, 20240510, 20240513, 20240514, 20240515, 20240520, 20240521, 20240522, 20240523, 20240524, 20240527, 20240528, 20240529, 20240530, 20240531, 20240603, 20240604, 20240605, 20240606, 20240607];
+        const highlightDatesWithMaven = [20240611, 20240612, 20240613, 20240614];
+
+        function createCalendar() {
+            const year = 2024;
+            const months = ['一月', '二月', '三月', '四月', '五月', '六月', '七月', '八月', '九月', '十月', '十一月', '十二月'];
+            const weekdays = ['一', '二', '三', '四', '五', '六', '日'];
+
+            for (let month = 0; month < 12; month++) {
+                const monthElement = document.createElement('div');
+                monthElement.className = 'month';
+
+                const monthName = document.createElement('div');
+                monthName.className = 'month-name';
+                monthName.textContent = months[month];
+                monthElement.appendChild(monthName);
+
+                const weekdaysElement = document.createElement('div');
+                weekdaysElement.className = 'weekdays';
+                weekdays.forEach(day => {
+                    const dayElement = document.createElement('div');
+                    dayElement.className = 'weekday';
+                    dayElement.textContent = day;
+                    weekdaysElement.appendChild(dayElement);
+                });
+                monthElement.appendChild(weekdaysElement);
+
+                const daysElement = document.createElement('div');
+                daysElement.className = 'days';
+
+                const firstDay = new Date(year, month, 1);
+                const lastDay = new Date(year, month + 1, 0);
+
+                // Add empty cells for days before the first day of the month
+                for (let i = 0; i < (firstDay.getDay() + 6) % 7; i++) {
+                    const emptyDay = document.createElement('div');
+                    emptyDay.className = 'day';
+                    daysElement.appendChild(emptyDay);
+                }
+
+                // Add days of the month
+                for (let day = 1; day <= lastDay.getDate(); day++) {
+                    const dayElement = document.createElement('div');
+                    dayElement.className = 'day';
+                    dayElement.textContent = day;
+
+                    const currentDate = parseInt(`${year}${(month + 1).toString().padStart(2, '0')}${day.toString().padStart(2, '0')}`);
+                    if (highlightDatesWeb1.includes(currentDate)) {
+                        dayElement.classList.add('highlightWeb1');
+                        dayElement.addEventListener('click', () => {
+                            const url = `https://gitee.com/iae24e03/stage0-note/tree/main/day${currentDate.toString().slice(2)}`;
+                            window.open(url, '_blank');
+                        });
+                    }
+                    if (highlightDatesWithoutMaven.includes(currentDate)) {
+                        dayElement.classList.add('highlight');
+                        dayElement.addEventListener('click', () => {
+                            const url = `https://gitee.com/iae24e03/javase/tree/main/src/day${currentDate.toString().slice(2)}/note`;
+                            window.open(url, '_blank');
+                        });
+                    }
+                    if (highlightDatesWithMaven.includes(currentDate)) {
+                        dayElement.classList.add('highlightWithMaven');
+                        dayElement.addEventListener('click', () => {
+                            const url = `https://gitee.com/iae24e03/javase2/tree/main/src/main/java/day${currentDate.toString().slice(2)}/note`;
+                            window.open(url, '_blank');
+                        });
+                    }
+
+                    daysElement.appendChild(dayElement);
+                }
+
+                monthElement.appendChild(daysElement);
+                document.getElementById("calendar-body").appendChild(monthElement);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', createCalendar);
+    </script>
+</body>
+</html>
